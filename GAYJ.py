@@ -2,19 +2,39 @@
 
 #    each of which can be 0 or 1
 
-
-
+import  ann
+import  pandas as pd
+import  numpy as np
 import random
-
+from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.neural_network import MLPClassifier#import the classifier
 from deap import base
 
 from deap import creator
 
 from deap import tools
 
-creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+pandas_data=pd.read_csv('sql_eigen.csv')
+sql_eigen=pandas_data.fillna(np.mean(pandas_data))
 
-creator.create("Individual", list, fitness=creator.FitnessMax)
+data =sql_eigen.iloc[:,0:85]
+# data.iloc[:,84][data.iloc[:,84]>200]=91
+data['age'][data['age']>200]=91
+data2=data.drop(['hr_cov', 'bpsys_cov', 'bpdia_cov', 'bpmean_cov', 'pulse_cov', 'resp_cov', 'spo2_cov'],axis=1)
+
+label=sql_eigen['class_label']
+
+dataMat1=np.array(data2)
+labelMat=np.array(label)
+
+data01 = ann.preprocess(dataMat1)
+dataMat = ann.preprocess1(data01)
+dataMat=np.array(dataMat)
+
+
+creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+
+creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
 
@@ -38,7 +58,7 @@ toolbox.register("attr_bool", random.randint, 0, 1)
 
 toolbox.register("individual", tools.initRepeat, creator.Individual,
 
-                 toolbox.attr_bool, 100)
+                 toolbox.attr_bool, 78)
 
 # define the population to be a list of individuals
 
@@ -46,8 +66,44 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
 # the goal ('fitness') function to be maximized
+######calculate the fitness value#######
 
+individual=toolbox.individual()
+individual = np.array(individual)
+index = np.where(individual == 1)
+for i in index:
+    data_in = dataMat[:, i]
+datain = np.array(data_in)
+
+neronum=len(index)
+clf=MLPClassifier(hidden_layer_sizes=(neronum,), activation='tanh',
+                      shuffle=True,solver='sgd',alpha=1e-6,batch_size=1,
+                      learning_rate='adaptive')
+
+skf = StratifiedShuffleSplit(n_splits=5)
+dataMat=datain
+scores=[]
+for train, test in skf.split(dataMat, labelMat):
+    print("%s %s" % (train, test))
+    train_in = dataMat[train]
+    test_in = dataMat[test]
+    train_out = labelMat[train]
+    test_out = labelMat[test]
+    clf.fit(train_in, train_out)
+    predict_prob = clf.predict_proba(test_in)
+    test=np.sum((predict_prob[:,1]-test_out)**2)
+    score=clf.score(test_in,test_out)
+    scores.append(score)
+fitnessvalue=np.mean(scores)
+#######calculate the fitness value#########
 def evalOneMax(individual):
+    individual = np.array(individual)
+    index = np.where(individual == 1)
+
+    for i in index:
+        data_in = dataMat[:, i]
+    datain = np.array(data_in)
+
     return sum(individual),
 
 
@@ -63,7 +119,7 @@ toolbox.register("evaluate", evalOneMax)
 
 # register the crossover operator
 
-toolbox.register("mate", tools.cxTwoPoint)
+toolbox.register("mate", tools.cxOnePoint)
 
 # register a mutation operator with a probability to
 
@@ -79,7 +135,7 @@ toolbox.register("mutate", tools.mutFlipBit, indpb=0.05)
 
 # drawn randomly from the current generation.
 
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("select", tools.selRoulette)
 
 
 # ----------

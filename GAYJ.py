@@ -91,8 +91,7 @@ for train, test in skf.split(dataMat, labelMat):
     test_out = labelMat[test]
     clf.fit(train_in, train_out)
     predict_prob = clf.predict_proba(test_in)
-    test=np.sum((predict_prob[:,1]-test_out)**2)
-    score=clf.score(test_in,test_out)
+    score=1/np.sum((predict_prob[:,1]-test_out)**2)
     scores.append(score)
 fitnessvalue=np.mean(scores)
 #######calculate the fitness value#########

@@ -14,25 +14,11 @@ from deap import creator
 
 from deap import tools
 
-pandas_data=pd.read_csv('sql_eigen.csv')
-sql_eigen=pandas_data.fillna(np.mean(pandas_data))
-
-data =sql_eigen.iloc[:,0:85]
-# data.iloc[:,84][data.iloc[:,84]>200]=91
-data['age'][data['age']>200]=91
-data2=data.drop(['hr_cov', 'bpsys_cov', 'bpdia_cov', 'bpmean_cov', 'pulse_cov', 'resp_cov', 'spo2_cov'],axis=1)
-
-label=sql_eigen['class_label']
-
-dataMat1=np.array(data2)
-labelMat=np.array(label)
-
-data01 = ann.preprocess(dataMat1)
-dataMat = ann.preprocess1(data01)
-dataMat=np.array(dataMat)
+global labelMat,dataMat
 
 
-creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
+
+creator.create("FitnessMin", base.Fitness, weights=(1.0,))
 
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -68,42 +54,40 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 # the goal ('fitness') function to be maximized
 ######calculate the fitness value#######
 
-individual=toolbox.individual()
-individual = np.array(individual)
-index = np.where(individual == 1)
-for i in index:
-    data_in = dataMat[:, i]
-datain = np.array(data_in)
 
-neronum=len(index)
-clf=MLPClassifier(hidden_layer_sizes=(neronum,), activation='tanh',
-                      shuffle=True,solver='sgd',alpha=1e-6,batch_size=1,
-                      learning_rate='adaptive')
-
-skf = StratifiedShuffleSplit(n_splits=5)
-dataMat=datain
-scores=[]
-for train, test in skf.split(dataMat, labelMat):
-    print("%s %s" % (train, test))
-    train_in = dataMat[train]
-    test_in = dataMat[test]
-    train_out = labelMat[train]
-    test_out = labelMat[test]
-    clf.fit(train_in, train_out)
-    predict_prob = clf.predict_proba(test_in)
-    score=1/np.sum((predict_prob[:,1]-test_out)**2)
-    scores.append(score)
-fitnessvalue=np.mean(scores)
 #######calculate the fitness value#########
 def evalOneMax(individual):
+    import  global_list as gl
+    dataMat=gl.dataMat
+    labelMat=gl.labelMat
+
     individual = np.array(individual)
     index = np.where(individual == 1)
-
     for i in index:
-        data_in = dataMat[:, i]
-    datain = np.array(data_in)
+        datain = dataMat[:, i]
+    datain = np.array(datain)
 
-    return sum(individual),
+    neronum = len(index)
+    clf = MLPClassifier(hidden_layer_sizes=(neronum,), activation='tanh',
+                        shuffle=True, solver='sgd', alpha=1e-6, batch_size=1,
+                        learning_rate='adaptive')
+
+    skf = StratifiedShuffleSplit(n_splits=1)
+    dataMat = datain
+    scores = []
+    for train, test in skf.split(dataMat, labelMat):
+        print("%s %s" % (train, test))
+        train_in = dataMat[train]
+        test_in = dataMat[test]
+        train_out = labelMat[train]
+        test_out = labelMat[test]
+        clf.fit(train_in, train_out)
+        predict_prob = clf.predict_proba(test_in)
+        score = 1 / np.sum((predict_prob[:, 1] - test_out) ** 2)
+        scores.append(score)
+    fitnessvalue = np.mean(scores)
+
+    return (fitnessvalue,)
 
 
 # ----------
@@ -148,7 +132,7 @@ def main():
 
     # each individual is a list of integers)
 
-    pop = toolbox.population(n=300)
+    pop = toolbox.population(n=2)
 
     # CXPB  is the probability with which two individuals
 
@@ -181,7 +165,7 @@ def main():
 
     # Begin the evolution
 
-    while max(fits) < 100 and g < 1000:
+    while max(fits) < 78 and g < 10:
 
         # A new generation
 

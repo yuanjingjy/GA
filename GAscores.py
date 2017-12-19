@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+# @Time    : 2017/12/19 16:21
+# @Author  : YuanJing
+# @File    : GAscores.py
+
 # -*- coding: utf-8 -*-
 """
 @author: YuanJing
@@ -74,8 +80,7 @@ def evalOneMax(individual):
                         shuffle=True, solver='sgd', alpha=1e-6, batch_size=5,
                         learning_rate='adaptive')
     clf.fit(train_in, train_out)
-    predict_prob = clf.predict_proba(test_in)
-    scores = 1 / np.sum((predict_prob[:, 1] - test_out) ** 2)
+    scores=clf.score(test_in,test_out)
     fitnessvalue = np.mean(scores)
 
     return (fitnessvalue,)
@@ -129,7 +134,7 @@ def main():
     # CXPB  is the probability with which two individuals are crossed
     # MUTPB is the probability for mutating an individual
 
-    CXPB, MUTPB = 0.6, 0.3
+    CXPB, MUTPB = 0.4, 0.2
 
     print("Start of evolution")
 
@@ -152,7 +157,7 @@ def main():
 
     # Begin the evolution
     meanfit=[]
-    while max(fits) < 78 and g < 100:
+    while max(fits) < 78 and g < 50:
 
         # A new generation
 

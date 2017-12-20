@@ -15,36 +15,14 @@ from deap import creator
 from deap import tools
 import numpy as np
 global labelMat,dataMat
+import  pandas as  pd
 
 creator.create("FitnessMax", base.Fitness, weights=(1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
-
-# Attribute generator
-
-#                      define 'attr_bool' to be an attribute ('gene')
-
-#                      which corresponds to integers sampled uniformly
-
-#                      from the range [0,1] (i.e. 0 or 1 with equal
-
-#                      probability)
-
 toolbox.register("attr_bool", random.randint, 0, 1)
-
-# Structure initializers
-
-#                         define 'individual' to be an individual
-
-#                         consisting of 100 'attr_bool' elements ('genes')
-
-toolbox.register("individual", tools.initRepeat, creator.Individual,
-
-                 toolbox.attr_bool, 78)
-
-# define the population to be a list of individuals
-
+toolbox.register("individual", tools.initRepeat, creator.Individual,toolbox.attr_bool, 78)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
@@ -53,7 +31,7 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 def evalOneMax(individual):
     import global_list as gl
     dataset=gl.dataSet
-    dataset=np.random.permutation(dataset)#打乱各行的顺序
+    # dataset=np.random.permutation(dataset)#打乱各行的顺序
     datain=dataset[:,0:78]#78个特征值
     label=dataset[:,78]#最后1列是标签
 
@@ -67,17 +45,17 @@ def evalOneMax(individual):
     datain = np.array(datain)
     label=dataset[:,78]
 
-    train_in=datain[0:690,:]
-    train_out=label[0:690]
+    train_in=datain[0:640,:]
+    train_out=label[0:640]
 
     from imblearn.under_sampling import RandomUnderSampler
     train_in, train_out = RandomUnderSampler().fit_sample(train_in, train_out)
 
-    test_in=datain[690:919,:]
-    test_out=label[690:919]
+    test_in=datain[640:919,:]
+    test_out=label[640:919]
 
     clf = MLPClassifier(hidden_layer_sizes=(neronum,), activation='tanh',
-                        shuffle=True, solver='sgd', alpha=1e-6, batch_size=5,
+                        shuffle=True, solver='sgd', alpha=1e-6, batch_size=3,
                         learning_rate='adaptive')
     clf.fit(train_in, train_out)
     scores=clf.score(test_in,test_out)
@@ -91,44 +69,20 @@ def evalOneMax(individual):
 
 # Operator registration
 
-# ----------
-
-# register the goal / fitness function
 
 toolbox.register("evaluate", evalOneMax)
-
-# register the crossover operator
-
 toolbox.register("mate", tools.cxTwoPoint)
-
-# register a mutation operator with a probability to
-
-# flip each attribute/gene of 0.09
-
 toolbox.register("mutate", tools.mutFlipBit, indpb=0.09)
-
-# operator for selecting individuals for breeding the next
-
-# generation: each individual of the current generation
-
-# is replaced by the 'fittest' (best) of three individuals
-
-# drawn randomly from the current generation.
-
 toolbox.register("select", tools.selRoulette)
 
 
 # ----------
-
-
-
 def main():
+    global  best_ind
+    global meanfit
     random.seed(64)
 
     # create an initial population of 20 individuals (where
-
-    # each individual is a list of integers)
-
     pop = toolbox.population(n=20)
 
     # CXPB  is the probability with which two individuals are crossed
@@ -157,7 +111,7 @@ def main():
 
     # Begin the evolution
     meanfit=[]
-    while max(fits) < 78 and g < 50:
+    while g < 20:
 
         # A new generation
 
@@ -239,15 +193,25 @@ def main():
 
     best_ind = tools.selBest(pop, 1)[0]
 
-    print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
-    import matplotlib.pyplot as plt
-
-    fig, ax1 = plt.subplots()
-    line1 = ax1.plot(meanfit, "b-", label="Minimum Fitness")
-    ax1.set_xlabel("Generation")
-    ax1.set_ylabel("Fitness", color="b")
-    plt.show()
+    # print("Best individual is %s, %s" % (best_ind, best_ind.fitness.values))
+    # import matplotlib.pyplot as plt
+    #
+    # fig, ax1 = plt.subplots()
+    # line1 = ax1.plot(meanfit, "b-", label="Minimum Fitness")
+    # ax1.set_xlabel("Generation")
+    # ax1.set_ylabel("Fitness", color="b")
+    # plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    best=[]
+    fits=[]
+    iter = 0
+    while iter < 30:
+        iter = iter + 1
+        main()
+        best.append(best_ind)
+    np.array(best)
+    np.savetxt("F:/filename1.txt", best)
+
+

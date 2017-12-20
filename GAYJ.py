@@ -75,7 +75,7 @@ def evalOneMax(individual):
                         learning_rate='adaptive')
     clf.fit(train_in, train_out)
     predict_prob = clf.predict_proba(test_in)
-    scores = 1 / np.sum((predict_prob[:, 1] - test_out) ** 2)
+    scores = 1 / np.sum((predict_prob[:, 0] - test_out) ** 2)
     fitnessvalue = np.mean(scores)
 
     return (fitnessvalue,)

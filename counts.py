@@ -13,7 +13,7 @@ from sklearn.neural_network import MLPClassifier  # import the classifier
 
 
 
-result=pd.read_csv("result.csv")
+result = pd.read_csv('result.csv')
 counts=sum(result)
 import  global_list as gl
 colnames=gl.data2

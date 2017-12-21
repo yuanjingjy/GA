@@ -51,9 +51,15 @@ print("test")
 datacolname= data2.drop(['class_label'], axis=1)#带名称的特征向量
 eigencounts = pd.DataFrame([IV],index=['score'],columns=datacolname.keys())
 sorteigen = eigencounts.sort_values(by='score',ascending=False, axis=1)
+# sorteigen.to_csv("F:/sorteigenMIV")
+# sorteigen.to_csv('F:/MIVsort.csv', encoding='utf-8', index=True)
 
 eigenwithname = pd.DataFrame(dataMat,columns=datacolname.keys())
 
+#############此段程序用于提取遗传算法得到的34个特征值
+c/
+##############################################
+#
 fitscore=[]
 for i in range(78):
     col=sorteigen.keys()

@@ -57,7 +57,7 @@ sorteigen = eigencounts.sort_values(by='score',ascending=False, axis=1)
 eigenwithname = pd.DataFrame(dataMat,columns=datacolname.keys())
 
 #############此段程序用于提取遗传算法得到的34个特征值
-c/
+
 ##############################################
 #
 fitscore=[]

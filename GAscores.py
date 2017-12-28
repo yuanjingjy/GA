@@ -4,10 +4,7 @@
 # @Author  : YuanJing
 # @File    : GAscores.py
 
-# -*- coding: utf-8 -*-
-"""
-@author: YuanJing
-"""
+# 遗传算法
 import random
 from sklearn.neural_network import MLPClassifier
 from deap import base

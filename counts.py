@@ -3,6 +3,7 @@
 # @Time    : 2017/12/20 14:45
 # @Author  : YuanJing
 # @File    : counts.py
+#将遗传算法的结果逐个加入到神经网络看预测结果
 
 import pandas as pd
 import  numpy as np

@@ -4,6 +4,7 @@ import  ann
 global dataMat
 global labelMat
 
+#建立全局变量，提取全部特征值
 
 ###read the data###
 pandas_data = pd.read_csv('sql_eigen.csv')

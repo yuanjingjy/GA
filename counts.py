@@ -28,8 +28,8 @@ labelMat=dataSet[:,78]
 fitscore=[]
 for i in range(78):
     col=sorteigen.keys()
-    index=col[0:i]
-    dataMat=dataSet[:,col]
+    index=col[0:i+1]
+    dataMat=dataSet[:,index]
     skf = StratifiedKFold(n_splits=10)
     scores=[]
     for train, test in skf.split(dataMat, labelMat):

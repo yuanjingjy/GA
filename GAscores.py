@@ -22,7 +22,7 @@ creator.create("Individual", list, fitness=creator.FitnessMax)
 
 toolbox = base.Toolbox()
 toolbox.register("attr_bool", random.randint, 0, 1)
-toolbox.register("individual", tools.initRepeat, creator.Individual,toolbox.attr_bool, 78)
+toolbox.register("individual", tools.initRepeat, creator.Individual,toolbox.attr_bool, 62)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
@@ -32,8 +32,8 @@ def evalOneMax(individual):
     import global_list as gl
     dataset=gl.dataSet
     # dataset=np.random.permutation(dataset)#打乱各行的顺序
-    datain=dataset[:,0:78]#78个特征值
-    label=dataset[:,78]#最后1列是标签
+    datain=dataset[:,0:62]#78个特征值
+    label=dataset[:,62]#最后1列是标签
 
     #找到选择出的变量
     individual = np.array(individual)
@@ -43,7 +43,7 @@ def evalOneMax(individual):
     for i in index:
         datain = dataset[:, i]
     datain = np.array(datain)
-    label=dataset[:,78]
+    label=dataset[:,62]
 
     train_in=datain[0:640,:]
     train_out=label[0:640]
@@ -111,7 +111,7 @@ def main():
 
     # Begin the evolution
     meanfit=[]
-    while g < 20:
+    while g < 50:
 
         # A new generation
 
